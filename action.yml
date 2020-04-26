@@ -19,4 +19,4 @@ outputs:
     description: "resulting file path"
 runs:
   using: "docker"
-  image: "Dockerfile"
+  image: 'docker://akabos/action-file:v1.0.0'
