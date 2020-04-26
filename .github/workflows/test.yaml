@@ -1,0 +1,45 @@
+---
+name: Test
+on: [ push ]
+
+jobs:
+
+  test-simple:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id:   file
+        uses: ./
+        with:
+          content: "hello world"
+      - run: |
+             set +eu
+             [[ -f ${{ steps.file.outputs.path }} ]]
+             [[ "$(cat ${{ steps.file.outputs.path }})" == "hello world" ]]
+
+  test-custom-path:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id:   file
+        uses: ./
+        with:
+          path: ./hello-world.txt
+      - run: |
+             set +eu
+             [[ -f ${{ steps.file.outputs.path }} ]]
+             [[ "${{ steps.file.outputs.path }}" == "hello-world.txt" ]]
+
+  test-base64-encoded:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id:   file
+        uses: ./
+        with:
+          encoding: "base64"
+          content: "aGVsbG8gd29ybGQ="
+      - run: |
+             set +eu
+             [[ -f ${{ steps.file.outputs.path }} ]]
+             [[ "$(cat ${{ steps.file.outputs.path }})" == "hello world" ]]
