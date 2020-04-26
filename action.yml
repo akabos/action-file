@@ -1,15 +1,15 @@
 ---
 name:        "File"
-description: "Write a file"
+description: "Create a file"
 branding:
   color: "gray-dark"
   icon:  "file-text"
 inputs:
   content:
-    description: "prefix for the tag generated from git tag ref"
+    description: "file content"
     required:    true
   encoding:
-    description: "optional content encoding [ base64 | base58 | base32 ]"
+    description: "optional file content encoding [ base64 | base58 | base32 ]"
     required:    false
   path:
     description: "optional file path, will be generated if omitted"
@@ -19,4 +19,4 @@ outputs:
     description: "resulting file path"
 runs:
   using: "docker"
-  image: 'docker://akabos/action-file:v1.0.0'
+  image: 'docker://akabos/action-file:v1.0.1'
