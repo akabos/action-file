@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/btcsuite/btcutil/base58"
@@ -16,12 +17,15 @@ import (
 
 func main() {
 	var args struct {
-		Content  string `envconfig:"INPUT_CONTENT"`
-		Path     string `envconfig:"INPUT_PATH"`
-		Encoding string `envconfig:"INPUT_ENCODING"`
+		Content       string `envconfig:"INPUT_CONTENT"`
+		Path          string `envconfig:"INPUT_PATH"`
+		Encoding      string `envconfig:"INPUT_ENCODING"`
+		WorkspacePath string `envconfig:"GITHUB_WORKSPACE" default:"./"`
 	}
 	var err error
 	envconfig.MustProcess("", &args)
+
+	debug("arguments: encoding=%q path=%q workspace-path=%q", args.Encoding, args.Path, args.WorkspacePath)
 
 	buf := bytes.NewBuffer(nil)
 
@@ -44,15 +48,20 @@ func main() {
 	var f *os.File
 
 	if args.Path == "" {
-		f, err = ioutil.TempFile(".", ".file-*")
+		f, err = ioutil.TempFile(args.WorkspacePath, ".file-*")
 	} else {
-		f, err = os.Create(args.Path)
+		f, err = os.Create(path.Clean(path.Join(args.WorkspacePath, args.Path)))
 	}
 	if err != nil {
 		die(errors.Wrap(err, "failed to open output file"))
 	}
+	_ = f.Chown(1000, 1000)
+	_ = f.Chmod(0644)
 	defer f.Close()
-	output("path", f.Name())
+
+	output("path", strings.TrimPrefix(strings.TrimPrefix(f.Name(), args.WorkspacePath), "/"))
+
+	debug("container path: %v", f.Name())
 
 	_, err = buf.WriteTo(f)
 	if err != nil {
@@ -69,4 +78,8 @@ func die(e error) {
 
 func output(name, value string) {
 	_, _ = fmt.Fprintf(os.Stdout, "::set-output name=%s::%s\n", name, value)
+}
+
+func debug(msg string, args ...interface{}) {
+	_, _ = fmt.Fprintf(os.Stdout, "::debug ::%v\n", fmt.Sprintf(msg, args...))
 }
