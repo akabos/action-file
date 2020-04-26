@@ -1,6 +1,6 @@
 ---
 name:        "File"
-description: "Write a file"
+description: "Create a file"
 branding:
   color: "gray-dark"
   icon:  "file-text"
